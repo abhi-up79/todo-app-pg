@@ -1,22 +1,27 @@
 import { Client } from "pg";
 import dotenv from "dotenv";
+import express from "express";
+import { getTodos } from "./todos";
 
 dotenv.config();
+const app = express()
+app.use(express.json())
 
-async function getUser(email: String) {
-    const client = new Client({
-        user: process.env.DB_USER,
-        password: process.env.DB_PASS,
-        host: process.env.DB_HOST,
-        database: process.env.DB_NAME,
-        ssl: true
+const port = 3000;
+
+app.post("/gettodos", (req, res) => {
+    const todos = getTodos(req.body.email);
+    res.json({
+        todos
     })
+})
 
-    await client.connect();
-    const query = 'SELECT * from todos where email=$1';
-    const values = [email];
-    const result = await client.query(query, values);
-    console.log(result.rows[0]);
-}
+app.get("/hello", (req, res) => {
+    res.json({
+        message: "Hello World!"
+    })
+})
 
-getUser("abhi@example.com")
+app.listen(port, () => {
+    console.log(`App is listening on port ${port}`);
+})
